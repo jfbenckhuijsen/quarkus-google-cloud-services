@@ -5,6 +5,7 @@
 * xref:bigquery.adoc[BigQuery]
 * xref:bigtable.adoc[BigTable]
 * xref:firebase-devservices.adoc[Firebase DevServices]
+* xref:firebase-realtime-database.adoc[Firebase Realtime Database]
 * xref:firebase-admin.adoc[Firebase Admin]
 * xref:firestore.adoc[Firestore]
 * xref:logging.adoc[Logging]
