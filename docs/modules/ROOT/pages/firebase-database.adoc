@@ -1,4 +1,4 @@
-= Google Cloud Services - Firebase Admin
+= Google Cloud Services - Firebase Realtime Database
 
 This extension allows to inject a `com.google.firebase.database.FirebaseDatabase` object inside your Quarkus application.
 
