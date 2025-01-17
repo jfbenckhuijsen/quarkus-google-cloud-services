@@ -1,6 +1,6 @@
 = Google Cloud Services - Firebase Admin
 
-This extension allows to inject a `com.google.cloud.firestore.Firestore` object inside your Quarkus application.
+This extension allows to inject a `com.google.firebase.database.FirebaseDatabase` object inside your Quarkus application.
 
 This extension will pickup on any available `com.google.firebase.FirebaseApp` (see https://quarkiverse.github.io/quarkiverse-docs/quarkus-google-cloud-services/main/firebase-admin.html[Firebase Admin extension] for more info) to configure the Realtime Database.
 
