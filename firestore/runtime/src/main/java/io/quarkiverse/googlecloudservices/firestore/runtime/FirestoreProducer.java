@@ -3,7 +3,6 @@ package io.quarkiverse.googlecloudservices.firestore.runtime;
 import java.io.IOException;
 import java.util.concurrent.ScheduledExecutorService;
 
-import com.google.cloud.grpc.GrpcTransportOptions;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.enterprise.inject.Disposes;
@@ -18,6 +17,7 @@ import com.google.api.gax.retrying.RetrySettings;
 import com.google.auth.Credentials;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.FirestoreOptions;
+import com.google.cloud.grpc.GrpcTransportOptions;
 
 import io.quarkiverse.googlecloudservices.common.GcpBootstrapConfiguration;
 import io.quarkiverse.googlecloudservices.common.GcpConfigHolder;
