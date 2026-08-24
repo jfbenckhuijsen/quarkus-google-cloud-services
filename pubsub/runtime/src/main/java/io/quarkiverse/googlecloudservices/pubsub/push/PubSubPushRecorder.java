@@ -43,7 +43,8 @@ public class PubSubPushRecorder {
                 endpoint,
                 config.getValue().verificationToken(),
                 config.getValue().serviceAccountEmail().orElseThrow(),
-                tokenVerifier));
+                tokenVerifier,
+                config.getValue().disableAuthentication()));
     }
 
     public Handler<RoutingContext> authHandlerInstance(RuntimeValue<GooglePubSubAuthenticationHandler> authHandler) {
