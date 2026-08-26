@@ -479,6 +479,27 @@ endif::add-copy-button-to-env-var[]
 |int
 |
 
+a|icon:lock[title=Fixed at build time] [[quarkus-google-cloud-firebase-devservices_quarkus-google-cloud-devservices-firebase-emulator-expose-to-companion-containers]] [.property-path]##link:#quarkus-google-cloud-firebase-devservices_quarkus-google-cloud-devservices-firebase-emulator-expose-to-companion-containers[`+++quarkus.google.cloud.devservices.firebase.emulator.expose-to-companion-containers+++`]##
+ifdef::add-copy-button-to-config-props[]
+config_property_copy_button:+++quarkus.google.cloud.devservices.firebase.emulator.expose-to-companion-containers+++[]
+endif::add-copy-button-to-config-props[]
+
+
+[.description]
+--
+Whether to expose the emulator's ports to companion containers this JVM starts via Testcontainers (e.g. a Playwright browser container), reachable via the `host.testcontainers.internal` ambassador hostname. Starts one small extra ambassador container (shared across the whole JVM, so this doesn't add up if other Dev Services already use it). Disable this if your tests never need a companion container to reach the emulator this way.
+
+
+ifdef::add-copy-button-to-env-var[]
+Environment variable: env_var_with_copy_button:+++QUARKUS_GOOGLE_CLOUD_DEVSERVICES_FIREBASE_EMULATOR_EXPOSE_TO_COMPANION_CONTAINERS+++[]
+endif::add-copy-button-to-env-var[]
+ifndef::add-copy-button-to-env-var[]
+Environment variable: `+++QUARKUS_GOOGLE_CLOUD_DEVSERVICES_FIREBASE_EMULATOR_EXPOSE_TO_COMPANION_CONTAINERS+++`
+endif::add-copy-button-to-env-var[]
+--
+|boolean
+|`+++true+++`
+
 a|icon:lock[title=Fixed at build time] [[quarkus-google-cloud-firebase-devservices_quarkus-google-cloud-devservices-firebase-auth-enabled]] [.property-path]##link:#quarkus-google-cloud-firebase-devservices_quarkus-google-cloud-devservices-firebase-auth-enabled[`+++quarkus.google.cloud.devservices.firebase.auth.enabled+++`]##
 ifdef::add-copy-button-to-config-props[]
 config_property_copy_button:+++quarkus.google.cloud.devservices.firebase.auth.enabled+++[]
@@ -582,6 +603,29 @@ Environment variable: `+++QUARKUS_GOOGLE_CLOUD_DEVSERVICES_FIREBASE_HOSTING_HOST
 endif::add-copy-button-to-env-var[]
 --
 |string
+|
+
+a|icon:lock[title=Fixed at build time] [[quarkus-google-cloud-firebase-devservices_quarkus-google-cloud-devservices-firebase-hosting-vite-hmr-port]] [.property-path]##link:#quarkus-google-cloud-firebase-devservices_quarkus-google-cloud-devservices-firebase-hosting-vite-hmr-port[`+++quarkus.google.cloud.devservices.firebase.hosting.vite.hmr-port+++`]##
+ifdef::add-copy-button-to-config-props[]
+config_property_copy_button:+++quarkus.google.cloud.devservices.firebase.hosting.vite.hmr-port+++[]
+endif::add-copy-button-to-config-props[]
+
+
+[.description]
+--
+The port the project's own Vite dev server is configured to listen on (the `server.port` setting in `vite.config.js`/`vite.config.ts`), and therefore also the port the browser's Vite HMR (hot module reload) client tries to reconnect on. Only relevant when the hosting directory is detected as a Vite project. Defaults to Vite's own default of 5173, which is what Firebase's emulator uses when it spawns the dev server without any `server.port` override present.
+
+If your `vite.config` customizes `server.port`, set this to the same value so the emulator publishes the port the HMR client actually needs to reach. It's recommended to also set `server.strictPort: true` in `vite.config`, so Vite fails fast instead of silently picking a different port if this one turns out to be unavailable.
+
+
+ifdef::add-copy-button-to-env-var[]
+Environment variable: env_var_with_copy_button:+++QUARKUS_GOOGLE_CLOUD_DEVSERVICES_FIREBASE_HOSTING_VITE_HMR_PORT+++[]
+endif::add-copy-button-to-env-var[]
+ifndef::add-copy-button-to-env-var[]
+Environment variable: `+++QUARKUS_GOOGLE_CLOUD_DEVSERVICES_FIREBASE_HOSTING_VITE_HMR_PORT+++`
+endif::add-copy-button-to-env-var[]
+--
+|int
 |
 
 a|icon:lock[title=Fixed at build time] [[quarkus-google-cloud-firebase-devservices_quarkus-google-cloud-devservices-firebase-database-enabled]] [.property-path]##link:#quarkus-google-cloud-firebase-devservices_quarkus-google-cloud-devservices-firebase-database-enabled[`+++quarkus.google.cloud.devservices.firebase.database.enabled+++`]##
