@@ -95,4 +95,45 @@
         </plugins>
     </build>
 
+    <profiles>
+        <!-- Without this profile, -Pnative on the reactor silently has no effect here (Maven just
+             warns "the requested profile could not be activated"), so this module built a plain
+             JVM jar under every native CI run, and SharedNetworkIT never actually exercised a
+             native binary. This module's real value is Firestore/PubSub without Spanner, so
+             common/grpc's grpc-netty-shaded exclusion is genuinely in effect here, unlike
+             integration-tests/main, where Spanner's own dependency quietly reintroduces it. That
+             value was never realized without native packaging actually happening. -->
+        <profile>
+            <id>native</id>
+            <activation>
+                <property>
+                    <name>native</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                    <goal>verify</goal>
+                                </goals>
+                                <configuration>
+                                    <systemProperties>
+                                        <native.image.path>${project.build.directory}/${project.build.finalName}-runner</native.image.path>
+                                    </systemProperties>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+            <properties>
+                <quarkus.package.type>native</quarkus.package.type>
+            </properties>
+        </profile>
+    </profiles>
+
 </project>
