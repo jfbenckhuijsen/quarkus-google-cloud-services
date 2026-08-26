@@ -25,15 +25,19 @@ public class GooglePubSubAuthenticationHandler implements Handler<RoutingContext
     private final Optional<String> verificationToken;
     private final String serviceAccountEmail;
     private final TokenVerifier verifier;
+    private final boolean disableAuthentication;
 
     public GooglePubSubAuthenticationHandler(String pubSubEndpoint,
             Optional<String> verificationToken,
             String serviceAccountEmail,
-            TokenVerifier verifier) {
+            TokenVerifier verifier,
+            boolean disableAuthentication) {
+
         this.pubSubEndpoint = pubSubEndpoint;
         this.verificationToken = verificationToken;
         this.serviceAccountEmail = serviceAccountEmail;
         this.verifier = verifier;
+        this.disableAuthentication = disableAuthentication;
     }
 
     public void handle(RoutingContext rc) {
@@ -68,11 +72,19 @@ public class GooglePubSubAuthenticationHandler implements Handler<RoutingContext
             LOGGER.debug("No verification token configured, ignoring check");
         }
 
-        LOGGER.debug("Inspecting authorization header for pubsub request");
-
+        // Remove auth header (if any) to prevent MP-JWT from handling it, regardless of whether
+        // this filter itself goes on to check it.
         var authorizationHeader = rc.request().headers().get("Authorization");
-        // Remove auth header to prevent MP-JWT to handle it.
         rc.request().headers().remove("Authorization");
+
+        if (disableAuthentication) {
+            LOGGER.warn(
+                    "Authentication for the pubsub push endpoint is disabled, this is not recommended for production environments");
+            rc.next();
+            return;
+        }
+
+        LOGGER.debug("Inspecting authorization header for pubsub request");
 
         if (Strings.isNullOrEmpty(authorizationHeader)) {
             LOGGER.error("No authentication header found, denying the pubsub message");
