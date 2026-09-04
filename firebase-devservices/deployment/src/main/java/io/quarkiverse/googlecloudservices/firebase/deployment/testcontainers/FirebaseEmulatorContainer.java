@@ -1132,6 +1132,7 @@ public class FirebaseEmulatorContainer extends GenericContainer<FirebaseEmulator
                 .firebaseConfig()
                 .hostingConfig()
                 .hostingContentDir()
+                .map(Path::toAbsolutePath)
                 .orElseGet(() -> new File(FirebaseJsonBuilder.FIREBASE_HOSTING_SUBPATH).getAbsoluteFile().toPath());
     }
 
