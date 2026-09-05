@@ -153,8 +153,9 @@ class FirebaseEmulatorConfigBuilderTest {
 
         var firebaseConfig = configBuilder.buildConfig().firebaseConfig();
 
-        assertPathEndsWith("overridden-hosting", firebaseConfig.hostingConfig().hostingContentDir().orElse(null));
+        assertPathEndsWith("overridden-hosting", firebaseConfig.hostingConfig().hostingOverride().orElse(null));
         assertPathEndsWith("overridden-functions", firebaseConfig.functionsConfig().functionsPath().orElse(null));
+        assertPathEndsWith("hosting", firebaseConfig.hostingConfig().hostingContentDir().orElse(null));
         // Everything else that came from the custom firebase.json must survive the override untouched.
         assertPathEndsWith("firestore.rules", firebaseConfig.firestoreConfig().rulesFile().orElse(null));
         assertPathEndsWith("storage.rules", firebaseConfig.storageConfig().rulesFile().orElse(null));

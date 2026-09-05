@@ -30,7 +30,10 @@ class FirebaseEmulatorContainerBuilderOverrideTest {
         builder.overrideHostingPath(Path.of("some-other-hosting-dir"));
         var after = builder.buildConfig().firebaseConfig();
 
-        assertEquals("some-other-hosting-dir", after.hostingConfig().hostingContentDir().orElseThrow().toString());
+        assertEquals("some-other-hosting-dir", after.hostingConfig().hostingOverride().orElseThrow().toString());
+        // hostingContentDir -- firebase.json's own declared, always-relative hosting source, which the
+        // container side relies on -- must survive the override untouched.
+        assertEquals(before.hostingConfig().hostingContentDir(), after.hostingConfig().hostingContentDir());
         // Everything else must survive the override untouched.
         assertEquals(before.functionsConfig(), after.functionsConfig());
         assertEquals(before.storageConfig(), after.storageConfig());

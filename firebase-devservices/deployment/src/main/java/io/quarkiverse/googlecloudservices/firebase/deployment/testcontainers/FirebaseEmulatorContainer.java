@@ -254,15 +254,28 @@ public class FirebaseEmulatorContainer extends GenericContainer<FirebaseEmulator
     /**
      * Firebase hosting configuration
      *
-     * @param hostingContentDir The path to the directory containing the hosting content
+     * @param hostingContentDir The path to the directory containing the hosting content, as declared by a custom
+     *        firebase.json's own {@code hosting.public}/{@code hosting.source} field (or set directly via
+     *        {@link FirebaseConfigBuilder#withHostingPath(Path)} when not reading from a firebase.json at all).
+     *        firebase-tools requires this to stay relative to firebase.json's own location, so this value is never
+     *        touched by {@link Builder#overrideHostingPath(Path)} -- see {@link #hostingOverride}.
+     * @param hostingOverride A caller-supplied host-side bind-mount source that takes precedence over
+     *        {@link #hostingContentDir} for locating the actual hosting content on disk, without affecting the
+     *        container-side path firebase-tools itself uses (which is always derived from
+     *        {@link #hostingContentDir}). Unlike {@link #hostingContentDir}, this may be absolute -- host-side path
+     *        resolution is environment-specific (e.g. a CI container's own bind-mount namespace) and has no
+     *        bearing on firebase.json's relative-path requirement. Set via
+     *        {@link Builder#overrideHostingPath(Path)}.
      * @param viteHmrPort The port the project's own vite.config.js configures the Vite dev server (and therefore
      *        its HMR client) to use, or empty to use Vite's default (see {@link ViteWebFramework#DEFAULT_HMR_PORT})
      */
     public record HostingConfig(
             Optional<Path> hostingContentDir,
+            Optional<Path> hostingOverride,
             Optional<Integer> viteHmrPort) {
 
         public static final HostingConfig DEFAULT = new HostingConfig(
+                Optional.empty(),
                 Optional.empty(),
                 Optional.empty());
     }
@@ -413,17 +426,21 @@ public class FirebaseEmulatorContainer extends GenericContainer<FirebaseEmulator
         }
 
         /**
-         * Override the hosting content directory of the {@link FirebaseConfig} already configured on this
-         * builder (typically via {@link #readFromFirebaseJson(Path)}).
+         * Override the host-side hosting content directory of the {@link FirebaseConfig} already configured on
+         * this builder (typically via {@link #readFromFirebaseJson(Path)}), without disturbing the firebase.json-
+         * declared value the container side relies on. See {@link HostingConfig#hostingOverride}.
          *
-         * @param hostingContentDir The hosting directory to use instead
+         * @param hostingContentDir The hosting directory to bind-mount from instead
          * @return This builder
          * @throws IllegalStateException if no {@link FirebaseConfig} has been configured yet
          */
         public Builder overrideHostingPath(Path hostingContentDir) {
             requireFirebaseConfig();
             this.firebaseConfig = new FirebaseConfig(
-                    new HostingConfig(Optional.of(hostingContentDir), this.firebaseConfig.hostingConfig().viteHmrPort()),
+                    new HostingConfig(
+                            this.firebaseConfig.hostingConfig().hostingContentDir(),
+                            Optional.of(hostingContentDir),
+                            this.firebaseConfig.hostingConfig().viteHmrPort()),
                     this.firebaseConfig.storageConfig(),
                     this.firebaseConfig.firestoreConfig(),
                     this.firebaseConfig.functionsConfig(),
@@ -903,6 +920,7 @@ public class FirebaseEmulatorContainer extends GenericContainer<FirebaseEmulator
             public FirebaseConfigBuilder withHostingPath(Path hostingContentDir) {
                 this.hostingConfig = new HostingConfig(
                         Optional.of(hostingContentDir),
+                        this.hostingConfig.hostingOverride(),
                         this.hostingConfig.viteHmrPort());
                 return this;
             }
@@ -918,6 +936,7 @@ public class FirebaseEmulatorContainer extends GenericContainer<FirebaseEmulator
             public FirebaseConfigBuilder withViteHmrPort(int viteHmrPort) {
                 this.hostingConfig = new HostingConfig(
                         this.hostingConfig.hostingContentDir(),
+                        this.hostingConfig.hostingOverride(),
                         Optional.of(viteHmrPort));
                 return this;
             }
@@ -1177,13 +1196,13 @@ public class FirebaseEmulatorContainer extends GenericContainer<FirebaseEmulator
      * The local (host machine) directory holding the hosting content, which gets bind-mounted into the
      * container. This is where {@link WebFramework} detection looks for framework-specific files, since the
      * container's own filesystem doesn't have the hosting content available until the volume is mounted at
-     * container startup.
+     * container startup. Prefers {@link HostingConfig#hostingOverride} over {@link HostingConfig#hostingContentDir}
+     * -- see {@link HostingConfig}'s own doc for why the two are kept separate.
      */
     private static Path hostHostingPath(EmulatorConfig emulatorConfig) {
-        return emulatorConfig
-                .firebaseConfig()
-                .hostingConfig()
-                .hostingContentDir()
+        var hostingConfig = emulatorConfig.firebaseConfig().hostingConfig();
+        return hostingConfig.hostingOverride()
+                .or(hostingConfig::hostingContentDir)
                 .orElseGet(() -> new File(FirebaseJsonBuilder.FIREBASE_HOSTING_SUBPATH).getAbsoluteFile().toPath());
     }
 
