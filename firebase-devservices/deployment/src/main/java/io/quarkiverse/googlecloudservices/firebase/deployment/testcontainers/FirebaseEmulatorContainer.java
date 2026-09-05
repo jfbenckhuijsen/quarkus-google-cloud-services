@@ -413,6 +413,51 @@ public class FirebaseEmulatorContainer extends GenericContainer<FirebaseEmulator
         }
 
         /**
+         * Override the hosting content directory of the {@link FirebaseConfig} already configured on this
+         * builder (typically via {@link #readFromFirebaseJson(Path)}).
+         *
+         * @param hostingContentDir The hosting directory to use instead
+         * @return This builder
+         * @throws IllegalStateException if no {@link FirebaseConfig} has been configured yet
+         */
+        public Builder overrideHostingPath(Path hostingContentDir) {
+            requireFirebaseConfig();
+            this.firebaseConfig = new FirebaseConfig(
+                    new HostingConfig(Optional.of(hostingContentDir), this.firebaseConfig.hostingConfig().viteHmrPort()),
+                    this.firebaseConfig.storageConfig(),
+                    this.firebaseConfig.firestoreConfig(),
+                    this.firebaseConfig.functionsConfig(),
+                    this.firebaseConfig.services());
+            return this;
+        }
+
+        /**
+         * The {@link FunctionsConfig} equivalent of {@link #overrideHostingPath(Path)}
+         *
+         * @param functionsPath The functions source directory to use instead
+         * @return This builder
+         * @throws IllegalStateException if no {@link FirebaseConfig} has been configured yet
+         */
+        public Builder overrideFunctionsPath(Path functionsPath) {
+            requireFirebaseConfig();
+            this.firebaseConfig = new FirebaseConfig(
+                    this.firebaseConfig.hostingConfig(),
+                    this.firebaseConfig.storageConfig(),
+                    this.firebaseConfig.firestoreConfig(),
+                    new FunctionsConfig(Optional.of(functionsPath), this.firebaseConfig.functionsConfig().ignores()),
+                    this.firebaseConfig.services());
+            return this;
+        }
+
+        private void requireFirebaseConfig() {
+            if (this.firebaseConfig == null) {
+                throw new IllegalStateException(
+                        "No Firebase configuration has been set yet -- call readFromFirebaseJson(...) or "
+                                + "withFirebaseConfig()...done() before overriding a specific path");
+            }
+        }
+
+        /**
          * Try to auto detect the firebase tools version to use based on the package.json configuration.
          *
          * @return The builder.
@@ -1094,7 +1139,7 @@ public class FirebaseEmulatorContainer extends GenericContainer<FirebaseEmulator
         emulatorConfig.cliArguments().emulatorData().ifPresent(path -> {
             // https://firebase.google.com/docs/emulator-suite/install_and_configure#export_and_import_emulator_data
             // Mount the volume to the specified path
-            this.withFileSystemBind(path.toString(), EMULATOR_DATA_PATH, BindMode.READ_WRITE);
+            this.withFileSystemBind(path.toAbsolutePath().toString(), EMULATOR_DATA_PATH, BindMode.READ_WRITE);
         });
 
         if (this.services.containsKey(Emulator.FIREBASE_HOSTING)) {
