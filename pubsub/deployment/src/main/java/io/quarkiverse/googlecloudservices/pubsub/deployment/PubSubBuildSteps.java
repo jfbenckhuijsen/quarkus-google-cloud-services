@@ -62,7 +62,13 @@ public class PubSubBuildSteps {
 
     @BuildStep
     public ReflectiveClassBuildItem registerPubSubNative() {
-        return ReflectiveClassBuildItem.builder(PubSubPushEndpointHandler.PubSubMessageJson.class).build();
+        return ReflectiveClassBuildItem.builder(PubSubPushEndpointHandler.PubSubMessageJson.class)
+                .fields(true)
+                .constructors(true)
+                .methods(true)
+                .reason("Used by serialization")
+                .serialization()
+                .build();
     }
 
 }
